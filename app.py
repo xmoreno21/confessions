@@ -72,7 +72,6 @@ def index():
     loggedin = discord.authorized
 
     data = psqlrun(query = "SELECT id, content, createdat, array_length(upvoters, 1) AS upvotes, array_length(reporters, 1) AS reports, (array_length(upvoters, 1) / POWER(EXTRACT(EPOCH FROM (NOW() - createdat)) + 600, 0.9)) AS score FROM confessions WHERE deletedby IS NULL ORDER BY score DESC LIMIT 100;", fetchall = True)
-    print(str(data))
 
     feed = []
     now = int(time())
