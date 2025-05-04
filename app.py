@@ -71,7 +71,7 @@ def logout():
 def index():
     loggedin = discord.authorized
 
-    data = psqlrun(query = "SELECT id, content, createdat, array_length(upvoters, 1) AS upvotes, array_length(reporters, 1) AS reports, (array_length(upvoters, 1) / POWER(EXTRACT(EPOCH FROM (NOW() - createdat)) + 60, 1.2)) AS score FROM confessions WHERE deletedby IS NULL ORDER BY score DESC LIMIT 100;", fetchall = True)
+    data = psqlrun(query = "SELECT id, content, createdat, array_length(upvoters, 1) AS upvotes, array_length(reporters, 1) AS reports, (array_length(upvoters, 1) / POWER(EXTRACT(EPOCH FROM (NOW() - createdat)) + 120, 1.1)) AS score FROM confessions WHERE deletedby IS NULL ORDER BY score DESC LIMIT 100;", fetchall = True)
 
     feed = []
     now = int(time())
