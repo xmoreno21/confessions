@@ -262,6 +262,6 @@ def admin_delete(confessionid: str):
     
     # delete the confession and add to audit log
     psqlrun(query = "UPDATE confessions SET deletedby = 1 WHERE id = %s;", data = (confessionid,), commit = True)
-    psqlrun(query = "INSERT INTO auditlog (confessionid, userhash, action, method) VALUES (%s, %s, %s, %s);", data = (confessionid, userhash, "DELETE", "ADMIN"), commit = True)
+    psqlrun(query = "INSERT INTO auditlog (confessionid, userhash, action, method) VALUES (%s, %s, %s, %s);", data = (confessionid, "N/A", "DELETE", "ADMIN"), commit = True)
 
     return jsonify({"status": "success"})
