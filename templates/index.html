@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta property="og:title" content="Sound's World Confessions">
+    <meta property="og:type" content="website">
+    <meta property="og:description" content="Sound's World Confessions">
+    <meta name="theme-color" content="#A564EE">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sound's World Confessions</title>
+    <link href="https://rsms.me/inter/inter.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Inter, sans-serif;
+            background-color: #2f3136;
+            color: #dcddde;
+            font-size: 15px;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .confession-box, .post-box {
+            background-color: #40444b;
+            border: 1px solid #ffffff22;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .confession-box:hover {
+            border-color: #ffffff44;
+        }
+        .confession-box p {
+            margin-top: 0;
+            margin-bottom: 10px; /* or whatever matches your bottom spacing */
+            line-height: 1.4; /* optional: makes it a bit more compact */
+            white-space: pre-wrap; /* ensures new lines are respected */
+            word-wrap: break-word; /* ensures long words are wrapped */
+        }
+        .confession-meta {
+            font-size: 12px;
+            color: #a0a0a0;
+            margin-top: 10px;
+        }
+        .confession-actions {
+            margin-top: 10px;
+        }
+        .confession-actions form {
+            display: inline;
+            margin-right: 10px;
+        }
+        .upvote-btn {
+            background: linear-gradient(to bottom, #0074D9, #00A0FF);
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .report-btn {
+            background: linear-gradient(to bottom, #FF4136, #FF0000);
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            border-radius: 10px;
+            padding: 10px;
+            border: none;
+            resize: none;
+            font-family: Inter, sans-serif;
+            font-size: 14px;
+            background-color: #2f3136;
+            color: #ffffff;
+            margin-top: 12px;
+            box-sizing: border-box;
+        }
+        .char-count {
+            font-size: 12px;
+            color: #a0a0a0;
+            margin-top: 4px;
+            text-align: right;
+        }
+        button.post-btn {
+            background-color: #7289da;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .logout-container {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 20px;
+        }
+        .main-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding-right: 120px;
+        }
+        .btn-primary, .btn-secondary {
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            color: #ffffff;
+            border: none;
+        }
+        .btn-primary {
+            background: linear-gradient(to bottom, #FF4136, #FF0000);
+        }
+        .btn-secondary {
+            background: linear-gradient(to bottom, #0074D9, #00A0FF);
+        }
+    </style>
+</head>
+<body>
+    <div class="logout-container">
+        {% if loggedin %}
+            <a href="/logout/"><button class="btn-primary">Logout</button></a>
+        {% else %}
+            <a href="/login/"><button class="btn-primary">Login</button></a>
+        {% endif %}
+    </div>
+
+    <div class="main-nav">
+        <a href="/"><button class="btn-secondary">Home</button></a>
+        <a href="/audit"><button class="btn-secondary">Audit Log</button></a>
+        <a href="/about"><button class="btn-secondary">About</button></a>
+    </div>
+
+    <div class="container">
+        <h1>Sound's World Confessions</h1>
+
+        {% if loggedin %}
+            <div class="post-box">
+                <form action="/submit" method="post">
+                    <label for="confession">Post a confession:</label><br>
+                    <textarea name="confession" id="confession" maxlength="1000" required oninput="updateCharCount()"></textarea>
+                    <div class="char-count" id="charCount">0 / 1000</div>
+                    <button class="post-btn" type="submit">Submit</button>
+                </form>
+            </div>
+        {% endif %}
+
+        {% for confession in feed %}
+            <div class="confession-box">
+                <p>{{ confession.content }}</p>
+                <div class="confession-meta">
+                    Upvotes: {{ confession.upvotes }} &nbsp;&nbsp;|&nbsp;&nbsp; Posted {{ confession.age }} ago
+                </div>
+                {% if loggedin %}
+                <div class="confession-actions">
+                    <form action="/upvote" method="post">
+                        <input type="hidden" name="confession_id" value="{{ confession.id }}">
+                        <button class="upvote-btn" type="submit">Upvote</button>
+                    </form>
+                    <form action="/report" method="post">
+                        <input type="hidden" name="confession_id" value="{{ confession.id }}">
+                        <button class="report-btn" type="submit">Report</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    
+
+    </div>
+
+    <script>
+        function updateCharCount() {
+            const textarea = document.getElementById('confession');
+            const countDisplay = document.getElementById('charCount');
+            countDisplay.textContent = `${textarea.value.length} / 1000`;
+        }
+    </script>
+</body>
+</html>

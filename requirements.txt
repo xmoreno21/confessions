@@ -1,0 +1,11 @@
+Flask-Discord==0.1.69
+blinker==1.9.0
+flask==3.1.0
+gunicorn==23.0.0
+requests==2.32.3
+orjson==3.10.15
+pynacl==1.5.0
+psycopg [binary] == 3.2.6
+psycopg-pool==3.2.6
+psutil==7.0.0
+pytz==2025.2
