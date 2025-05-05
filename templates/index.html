@@ -145,6 +145,19 @@
     <div class="container">
         <h1>Sound's World Confessions</h1>
 
+        <div class="container">
+            <h1>Sound's World Confessions</h1>
+        
+            <form method="get" action="/" style="margin-bottom: 20px;">
+                <label for="sort" style="font-weight: bold;">Sort by:</label>
+                <select id="sort" name="sort" onchange="this.form.submit()" style="margin-left: 10px; padding: 6px; border-radius: 6px; background-color: #40444b; color: white; border: 1px solid #ffffff22;">
+                    <option value="trending" {% if sort == 'trending' %}selected{% endif %}>Trending</option>
+                    <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
+                    <option value="top" {% if sort == 'top' %}selected{% endif %}>Most Upvoted</option>
+                </select>
+            </form>
+        
+
         {% if loggedin %}
             <div class="post-box">
                 <form action="/submit" method="post">

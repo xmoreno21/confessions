@@ -72,8 +72,16 @@ def logout():
 @app.route("/", methods = ["GET"])
 def index():
     loggedin = discord.authorized
+    sort = request.args.get("sort", "trending")  # default to trending
+    if sort not in ['trending', 'newest', 'top']:
+        sort = 'trending'
 
-    data = psqlrun(query = "SELECT id, content, createdat, COALESCE(array_length(upvoters, 1), 0) AS upvotes, COALESCE(array_length(reporters, 1), 0) AS reports, (COALESCE(array_length(upvoters, 1), 0) + 1) / POWER(EXTRACT(EPOCH FROM (NOW() - createdat)) + 600, 0.9) AS score FROM confessions WHERE deletedby IS NULL ORDER BY score DESC LIMIT 50;", fetchall = True)
+    if sort == 'trending':
+        data = psqlrun(query = "SELECT id, content, createdat, COALESCE(array_length(upvoters, 1), 0) AS upvotes, COALESCE(array_length(reporters, 1), 0) AS reports, (COALESCE(array_length(upvoters, 1), 0) + 1) / POWER(EXTRACT(EPOCH FROM (NOW() - createdat)) + 600, 0.9) AS score FROM confessions WHERE deletedby IS NULL ORDER BY score DESC LIMIT 50;", fetchall = True)
+    elif sort == 'newest':
+        data = psqlrun(query = "SELECT id, content, createdat, COALESCE(array_length(upvoters, 1), 0) AS upvotes, COALESCE(array_length(reporters, 1), 0) AS reports FROM confessions WHERE deletedby IS NULL ORDER BY createdat DESC LIMIT 50;", fetchall = True)
+    elif sort == 'top':
+        data = psqlrun(query = "SELECT id, content, createdat, COALESCE(array_length(upvoters, 1), 0) AS upvotes, COALESCE(array_length(reporters, 1), 0) AS reports FROM confessions WHERE deletedby IS NULL ORDER BY upvotes DESC LIMIT 50;", fetchall = True)
 
     feed = []
     now = int(time())
