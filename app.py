@@ -104,7 +104,7 @@ def index():
             "age": age
         })
 
-    return render_template('index.html', loggedin = loggedin, feed = feed)
+    return render_template('index.html', loggedin = loggedin, feed = feed, sort = sort)
 
 @app.route("/audit", methods = ["GET"])
 def audit():

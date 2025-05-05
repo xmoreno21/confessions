@@ -145,14 +145,13 @@
     <div class="container">
         <h1>Sound's World Confessions</h1>
         
-        <form method="get" action="/" style="margin-bottom: 20px;">
-            <label for="sort" style="font-weight: bold;">Sort by:</label>
-            <select id="sort" name="sort" onchange="this.form.submit()" style="margin-left: 10px; padding: 6px; border-radius: 6px; background-color: #40444b; color: white; border: 1px solid #ffffff22;">
-                <option value="trending" {% if sort == 'trending' %}selected{% endif %}>Trending</option>
-                <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
-                <option value="top" {% if sort == 'top' %}selected{% endif %}>Most Upvoted</option>
-            </select>
-        </form>
+        <label for="sortSelect">Sort by:</label>
+        <select id="sortSelect" onchange="handleSortChange()">
+            <option value="/" {% if sort == 'trending' %}selected{% endif %}>Trending</option>
+            <option value="/top" {% if sort == 'top' %}selected{% endif %}>Most Upvoted</option>
+            <option value="/newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
+        </select>
+        
         
 
         {% if loggedin %}
@@ -195,6 +194,12 @@
             const textarea = document.getElementById('confession');
             const countDisplay = document.getElementById('charCount');
             countDisplay.textContent = `${textarea.value.length} / 1000`;
+        }
+        </script>
+    <script>
+        function handleSortChange() {
+            const sort = document.getElementById("sortSelect").value;
+            window.location.href = sort;
         }
     </script>
 </body>
