@@ -29,7 +29,7 @@ def dynamicredirect(request: Request, error: Optional[str] = None) -> redirect:
 
     if error:
         error = errors.get(error, "Unknown error")
-        queryparams["error"] = error
+        queryparams["err"] = error
 
     return redirect(f"/?{urlencode(queryparams)}")
 
