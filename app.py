@@ -106,7 +106,7 @@ def index():
     elif sort == 'newest':
         basequery += " ORDER BY createdat DESC"
     elif sort == 'top':
-        basequery += " ORDER BY upvotes DESC"
+        basequery += " ORDER BY upvotes DESC, createdat DESC"
 
     basequery += " LIMIT 50;"
 
