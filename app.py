@@ -4,7 +4,7 @@ from Config import psqlrun, hashuserid, formatage, errors
 from time import time, sleep
 from typing import Optional
 from os import environ
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse, urlunparse, parse_qs
 sleep(3)
 
 APPID = environ['APP_ID']
@@ -24,15 +24,19 @@ app.config['DISCORD_REDIRECT_URI'] = 'https://confessions.xmo.dev/callback'
 
 discord = DiscordOAuth2Session(app)
 
-def dynamicredirect(request: Request, error: Optional[str] = None) -> redirect:
-    queryparams = request.args.to_dict(flat = True)
-    print(queryparams)
+def dynamicredirect(error: Optional[str] = None):
+    referrer = request.referrer
+    if not referrer:
+        return redirect("/")  # fallback
+
+    url_parts = list(urlparse(referrer))
+    query = parse_qs(url_parts[4])  # the query string as a dict
 
     if error:
-        error = errors.get(error, "Unknown error")
-        queryparams["err"] = error
+        query["error"] = [errors.get(error, "Unknown error")]
 
-    return redirect(f"/?{urlencode(queryparams)}")
+    url_parts[4] = urlencode(query, doseq=True)
+    return redirect(urlunparse(url_parts))
 
 
 @app.route("/login/")
