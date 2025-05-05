@@ -220,7 +220,7 @@ def report():
     data = psqlrun(query = "SELECT array_length(reporters, 1) FROM confessions WHERE id = %s;", data = (confessionid,), fetchall = False)
 
 
-    if data and data[0] >= 10:
+    if data and data[0] >= 5:
         psqlrun(query = "UPDATE confessions SET deletedby = 2 WHERE id = %s;", data = (confessionid,), commit = True)
         psqlrun(query = "INSERT INTO auditlog (confessionid, userhash, action, method) VALUES (%s, %s, %s, %s);", data = (confessionid, "N/A", "DELETE", "SYSTEM"), commit = True)
 
