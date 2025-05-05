@@ -125,6 +125,18 @@
         .btn-secondary {
             background: linear-gradient(to bottom, #0074D9, #00A0FF);
         }
+        .sort-container {
+        margin-bottom: 20px;
+        }
+        #sortSelect {
+            background-color: #40444b;
+            color: #ffffff;
+            border: 1px solid #ffffff22;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
@@ -145,12 +157,14 @@
     <div class="container">
         <h1>Sound's World Confessions</h1>
         
-        <label for="sortSelect">Sort by:</label>
-        <select id="sortSelect" onchange="handleSortChange()">
-            <option value="/" {% if sort == 'trending' %}selected{% endif %}>Trending</option>
-            <option value="/top" {% if sort == 'top' %}selected{% endif %}>Most Upvoted</option>
-            <option value="/newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
-        </select>
+        <div class="sort-container">
+            <label for="sortSelect">Sort by:</label>
+            <select id="sortSelect" onchange="handleSortChange()">
+                <option value="trending" {% if sort == 'trending' %}selected{% endif %}>Trending</option>
+                <option value="top" {% if sort == 'top' %}selected{% endif %}>Most Upvoted</option>
+                <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
+            </select>
+        </div>
         
         
 
@@ -198,8 +212,10 @@
         </script>
     <script>
         function handleSortChange() {
-            const sort = document.getElementById("sortSelect").value;
-            window.location.href = sort;
+            const selectedSort = document.getElementById("sortSelect").value;
+            const url = new URL(window.location.href);
+            url.searchParams.set("sort", selectedSort);
+            window.location.href = url.toString();
         }
     </script>
 </body>
