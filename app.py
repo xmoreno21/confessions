@@ -80,7 +80,7 @@ def index():
     if len(search) > 100:
         search = search[:100]  # truncate to 100 characters
 
-    basequery = "SELECT id, content, createdat, array_length(upvoters, 1) AS upvotes, array_length(reporters, 1) AS reports, (array_length(upvoters, 1) / POWER(EXTRACT(EPOCH FROM (NOW() - createdat)) + 600, 0.9)) AS score FROM confessions WHERE deletedby IS NULL"
+    basequery = "SELECT id, content, createdat, COALESCE(array_length(upvoters, 1), 0) AS upvotes, COALESCE(array_length(reporters, 1), 0) AS reports, (COALESCE(array_length(upvoters, 1), 0) / POWER(EXTRACT(EPOCH FROM (NOW() - createdat)) + 600, 0.9)) AS score FROM confessions WHERE deletedby IS NULL"
 
     queryparams = []
     if search:
