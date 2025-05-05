@@ -156,16 +156,25 @@
 
     <div class="container">
         <h1>Sound's World Confessions</h1>
+
+        <form method="GET" action="/" style="margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+            <input
+                type="text"
+                name="q"
+                value="{{ request.args.get('q', '') }}"
+                maxlength="100"
+                placeholder="Search confessions..."
+                style="flex: 1; padding: 10px; border-radius: 8px; border: none; background-color: #40444b; color: white; font-size: 14px;"
+            >
         
-        <div class="sort-container">
-            <label for="sortSelect">Sort by:</label>
-            <select id="sortSelect" onchange="handleSortChange()">
-                <option value="trending" {% if sort == 'trending' %}selected{% endif %}>Trending</option>
-                <option value="top" {% if sort == 'top' %}selected{% endif %}>Most Upvoted</option>
-                <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
+            <select name="sort" onchange="this.form.submit()" style="padding: 10px; border-radius: 8px; border: none; background-color: #40444b; color: white; font-weight: bold;">
+                <option value="trending" {% if sort == "trending" %}selected{% endif %}>Trending</option>
+                <option value="newest" {% if sort == "newest" %}selected{% endif %}>Newest</option>
+                <option value="top" {% if sort == "top" %}selected{% endif %}>Top</option>
             </select>
-        </div>
         
+            <button type="submit" class="post-btn" style="margin: 0;">Search</button>
+        </form>
         
 
         {% if loggedin %}

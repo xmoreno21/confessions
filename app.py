@@ -76,12 +76,27 @@ def index():
     if sort not in ['trending', 'newest', 'top']:
         sort = 'trending'
 
+    search = request.args.get("q", "").strip()
+    if len(search) > 100:
+        search = search[:100]  # truncate to 100 characters
+
+    basequery = "SELECT id, content, createdat, array_length(upvoters, 1) AS upvotes, array_length(reporters, 1) AS reports, (array_length(upvoters, 1) / POWER(EXTRACT(EPOCH FROM (NOW() - createdat)) + 600, 0.9)) AS score FROM confessions WHERE deletedby IS NULL"
+
+    queryparams = []
+    if search:
+        basequery += " AND content ILIKE %s"
+        queryparams.append(f"%{search}%")
+
     if sort == 'trending':
-        data = psqlrun(query = "SELECT id, content, createdat, COALESCE(array_length(upvoters, 1), 0) AS upvotes, COALESCE(array_length(reporters, 1), 0) AS reports, (COALESCE(array_length(upvoters, 1), 0) + 1) / POWER(EXTRACT(EPOCH FROM (NOW() - createdat)) + 300, 0.9) AS score FROM confessions WHERE deletedby IS NULL ORDER BY score DESC LIMIT 50;", fetchall = True)
+        basequery += " ORDER BY score DESC"
     elif sort == 'newest':
-        data = psqlrun(query = "SELECT id, content, createdat, COALESCE(array_length(upvoters, 1), 0) AS upvotes, COALESCE(array_length(reporters, 1), 0) AS reports FROM confessions WHERE deletedby IS NULL ORDER BY createdat DESC LIMIT 50;", fetchall = True)
+        basequery += " ORDER BY createdat DESC"
     elif sort == 'top':
-        data = psqlrun(query = "SELECT id, content, createdat, COALESCE(array_length(upvoters, 1), 0) AS upvotes, COALESCE(array_length(reporters, 1), 0) AS reports FROM confessions WHERE deletedby IS NULL ORDER BY upvotes DESC LIMIT 50;", fetchall = True)
+        basequery += " ORDER BY upvotes DESC"
+
+    basequery += " LIMIT 50;"
+
+    data = psqlrun(query = basequery, data = tuple(queryparams), fetchall = True)
 
     feed = []
     now = int(time())
