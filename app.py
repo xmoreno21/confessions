@@ -26,6 +26,7 @@ discord = DiscordOAuth2Session(app)
 
 def dynamicredirect(request: Request, error: Optional[str] = None) -> redirect:
     queryparams = request.args.to_dict(flat = True)
+    print(queryparams)
 
     if error:
         error = errors.get(error, "Unknown error")
