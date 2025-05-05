@@ -261,31 +261,36 @@ def report():
         psqlrun(query = "UPDATE confessions SET deletedby = 2 WHERE id = %s;", data = (confessionid,), commit = True)
         psqlrun(query = "INSERT INTO auditlog (confessionid, userhash, action, method) VALUES (%s, %s, %s, %s);", data = (confessionid, "N/A", "DELETE", "SYSTEM"), commit = True)
 
-        delconfessioncount = int(psqlrun(query = "UPDATE users SET deletedconfessions = deletedconfessions + 1 WHERE userhash = %s RETURNING deletedconfessions;", data = (userhash,), commit = True)[0])
+        # Get the original poster's hash
+        posterdata = psqlrun("SELECT userhash FROM confessions WHERE id = %s;", data = (confessionid,), fetchall = False)
+        if posterdata:
+            posterhash = posterdata[0]
+
+        delconfessioncount = int(psqlrun(query = "UPDATE users SET deletedconfessions = deletedconfessions + 1 WHERE userhash = %s RETURNING deletedconfessions;", data = (posterhash,), commit = True)[0])
 
         if delconfessioncount >= 3:
             # suspend the user for 1 day
             suspensionuntil = int(time()) + 86400
-            psqlrun(query = "UPDATE users SET suspensionuntil = %s WHERE userhash = %s;", data = (suspensionuntil, userhash), commit = True)
+            psqlrun(query = "UPDATE users SET suspensionuntil = %s WHERE userhash = %s;", data = (suspensionuntil, posterhash), commit = True)
 
             # audit log the suspension
-            psqlrun(query = "INSERT INTO auditlog (confessionid, userhash, action, method) VALUES (%s, %s, %s, %s);", data = (confessionid, userhash, "SUSPEND", "SYSTEM"), commit = True)
+            psqlrun(query = "INSERT INTO auditlog (confessionid, userhash, action, method) VALUES (%s, %s, %s, %s);", data = (confessionid, posterhash, "SUSPEND", "SYSTEM"), commit = True)
         
         if delconfessioncount >= 5:
             # suspend the user for 3 days
             suspensionuntil = int(time()) + 259200
-            psqlrun(query = "UPDATE users SET suspensionuntil = %s WHERE userhash = %s;", data = (suspensionuntil, userhash), commit = True)
+            psqlrun(query = "UPDATE users SET suspensionuntil = %s WHERE userhash = %s;", data = (suspensionuntil, posterhash), commit = True)
 
             # audit log the suspension
-            psqlrun(query = "INSERT INTO auditlog (confessionid, userhash, action, method) VALUES (%s, %s, %s, %s);", data = (confessionid, userhash, "SUSPEND", "SYSTEM"), commit = True)
+            psqlrun(query = "INSERT INTO auditlog (confessionid, userhash, action, method) VALUES (%s, %s, %s, %s);", data = (confessionid, posterhash, "SUSPEND", "SYSTEM"), commit = True)
 
         if delconfessioncount >= 8:
             # suspend the user indefinitely
             suspensionuntil = 0
-            psqlrun(query = "UPDATE users SET suspensionuntil = %s WHERE userhash = %s;", data = (suspensionuntil, userhash), commit = True)
+            psqlrun(query = "UPDATE users SET suspensionuntil = %s WHERE userhash = %s;", data = (suspensionuntil, posterhash), commit = True)
 
             # audit log the suspension
-            psqlrun(query = "INSERT INTO auditlog (confessionid, userhash, action, method) VALUES (%s, %s, %s, %s);", data = (confessionid, userhash, "SUSPEND", "SYSTEM"), commit = True)
+            psqlrun(query = "INSERT INTO auditlog (confessionid, userhash, action, method) VALUES (%s, %s, %s, %s);", data = (confessionid, posterhash, "SUSPEND", "SYSTEM"), commit = True)
 
     return dynamicredirect()
 
