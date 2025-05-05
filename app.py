@@ -67,11 +67,13 @@ def logout():
     discord.revoke()
     return redirect(redirect_url)
 
+
+
 @app.route("/", methods = ["GET"])
 def index():
     loggedin = discord.authorized
 
-    data = psqlrun(query = "SELECT id, content, createdat, array_length(upvoters, 1) AS upvotes, array_length(reporters, 1) AS reports, (array_length(upvoters, 1) / POWER(EXTRACT(EPOCH FROM (NOW() - createdat)) + 600, 0.9)) AS score FROM confessions WHERE deletedby IS NULL ORDER BY score DESC LIMIT 100;", fetchall = True)
+    data = psqlrun(query = "SELECT id, content, createdat, COALESCE(array_length(upvoters, 1), 0) AS upvotes, COALESCE(array_length(reporters, 1), 0) AS reports, (COALESCE(array_length(upvoters, 1), 0) + 1) / POWER(EXTRACT(EPOCH FROM (NOW() - createdat)) + 600, 0.9) AS score FROM confessions WHERE deletedby IS NULL ORDER BY score DESC LIMIT 50;", fetchall = True)
 
     feed = []
     now = int(time())
