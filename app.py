@@ -166,33 +166,33 @@ def about():
 @app.route("/submit", methods = ["POST"])
 def submit():
     if not discord.authorized:
-        return redirect("/")
+        return dynamicredirect("notloggedin")
     
     confession = request.form.get("confession", "").strip()
     if not confession:
-        return redirect("/") # empty confession
+        return dynamicredirect("emptyconfession")
     if len(confession) > 1000:
-        return redirect("/") # confession too long
+        return dynamicredirect("confessiontoolong")
     
     # ensure the user exists in the database. they should, but just in case
     userhash = hashuserid(discord.fetch_user().id)
     userdata = psqlrun(query = "SELECT cooldownuntil, suspensionuntil FROM users WHERE userhash = %s;", data = (userhash,), fetchall = False)
     if userdata is None:
-        return redirect("/") # user not found in database
+        return dynamicredirect("usernotfound")
     
     cooldownuntil = userdata[0]
     suspensionuntil = userdata[1]
 
     # check if they're suspended indefinitely
     if suspensionuntil == 0:
-        return redirect("/")
+        return dynamicredirect("indefintelysuspended")
 
     now = int(time())
     if cooldownuntil is not None and now < cooldownuntil:
-        return redirect("/") # user is on cooldown
+        return dynamicredirect("oncooldown") # user is on cooldown
     
     if suspensionuntil is not None and now < suspensionuntil:
-        return redirect("/") # user is suspended
+        return dynamicredirect("suspended") # user is suspended
     
     # good to go, insert the confession and audit log and start the cooldown
     cooldownuntil = now + 300
@@ -201,12 +201,12 @@ def submit():
     confessionid = int(psqlrun(query = "INSERT INTO confessions (userhash, content, upvoters, reporters) VALUES (%s, %s, %s, %s) RETURNING id;", data = (userhash, confession, [], []), commit = True)[0])
     
     psqlrun(query = "INSERT INTO auditlog (confessionid, userhash, action, method) VALUES (%s, %s, %s, %s);", data = (confessionid, userhash, "CREATE", "USER"), commit = True)
-    return redirect("/")
+    return dynamicredirect()
 
 @app.route("/upvote", methods=["POST"])
 def upvote():
     if not discord.authorized:
-        return redirect("/")
+        return dynamicredirect("notloggedin")
     
     userhash = hashuserid(discord.fetch_user().id)
     confessionid = request.form.get("confession_id")
@@ -214,7 +214,7 @@ def upvote():
     # Check if user has already upvoted
     data = psqlrun("SELECT upvoters FROM confessions WHERE id = %s;", data = (confessionid,), fetchall = False)
     if not data:
-        return redirect("/")  # Invalid confession
+        return dynamicredirect("confessionnotfound")  # Invalid confession
 
     upvoters = data[0] or []
 
@@ -227,12 +227,12 @@ def upvote():
     # Audit log
     psqlrun("INSERT INTO auditlog (confessionid, userhash, action, method) VALUES (%s, %s, %s, %s);",data = (confessionid, userhash, "UPVOTE", "USER"), commit = True)
 
-    return redirect("/")
+    return dynamicredirect()
 
 @app.route("/report", methods=["POST"])
 def report():
     if not discord.authorized:
-        return redirect("/")
+        return dynamicredirect("notloggedin")
     
     userhash = hashuserid(discord.fetch_user().id)
     confessionid = request.form.get("confession_id")
@@ -240,12 +240,12 @@ def report():
     # Check if user has already reported
     data = psqlrun("SELECT reporters FROM confessions WHERE id = %s;", data = (confessionid,), fetchall = False)
     if not data:
-        return redirect("/")  # Invalid confession
+        return dynamicredirect("confessionnotfound")  # Invalid confession
 
     reporters = data[0] or []
 
     if userhash in reporters:
-        return redirect("/")  # Already reported
+        return dynamicredirect("alreadyreported")  # Already reported
 
     # Add user to upvoters
     psqlrun("UPDATE confessions SET reporters = array_append(reporters, %s) WHERE id = %s;", data = (userhash, confessionid), commit = True)
@@ -287,17 +287,17 @@ def report():
             # audit log the suspension
             psqlrun(query = "INSERT INTO auditlog (confessionid, userhash, action, method) VALUES (%s, %s, %s, %s);", data = (confessionid, userhash, "SUSPEND", "SYSTEM"), commit = True)
 
-    return redirect("/")
+    return dynamicredirect()
 
 @app.route("/admin/delete/<confessionid>", methods = ["GET"])
 def admin_delete(confessionid: str):
     if not discord.authorized:
-        return redirect("/")
+        return dynamicredirect("notloggedin")
     
     userhash = hashuserid(discord.fetch_user().id)
     
     if userhash != XMO_HASH:
-        return redirect("/")
+        return dynamicredirect("noaccess")
     
     # delete the confession and add to audit log
     psqlrun(query = "UPDATE confessions SET deletedby = 1 WHERE id = %s;", data = (confessionid,), commit = True)
