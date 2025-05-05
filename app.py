@@ -33,7 +33,7 @@ def dynamicredirect(error: Optional[str] = None):
     query = parse_qs(url_parts[4])  # the query string as a dict
 
     if error:
-        query["error"] = [errors.get(error, "Unknown error")]
+        query["err"] = [errors.get(error, "Unknown error")]
 
     url_parts[4] = urlencode(query, doseq=True)
     return redirect(urlunparse(url_parts))
