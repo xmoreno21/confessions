@@ -18,6 +18,21 @@ TOKEN = environ['TOKEN']
 HASHING_KEY = environ['HASHING_KEY']
 starttime = round(time())
 
+errors = {
+    'loginrejected': 'Login rejected - You are not in Sound\'s World',
+    'notloggedin': 'You are not logged in - Please login to perform this action',
+    'emptyconfession': 'Confession cannot be empty - Please provide a confession',
+    'confessiontoolong': 'Confession is too long - Please provide a confession that is less than 1000 characters',
+    'usernotfound': 'User not found.',
+    'indefintelysuspended': 'You are indefinitely suspended.',
+    'suspended': 'You are currently suspended. Please wait until your suspension is over',
+    'oncooldown': 'You are currently on cooldown. Please wait until your cooldown is over',
+    'confessionnotfound': 'Confession not found.',
+    'alreadyupvoted': 'You have already upvoted this confession.',
+    'alreadyreported': 'You have already reported this confession.',
+    'noaccess': 'You do not have access to this function.',
+}
+
 dbpool = ConnectionPool(conninfo = DATABASE_URL, min_size = 3, max_size = 10)
 
 def psqlrun(query: str, data: Optional[Tuple] = None, commit: bool = False, fetchall: bool = False):

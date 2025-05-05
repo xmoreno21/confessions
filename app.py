@@ -1,11 +1,10 @@
-from flask import Flask, request, jsonify, render_template, redirect
-from flask_discord import DiscordOAuth2Session, exceptions
-from Config import makereq, psqlrun, hashuserid, formatage
-from requests import get
+from flask import Flask, request, jsonify, render_template, redirect, Request
+from flask_discord import DiscordOAuth2Session
+from Config import psqlrun, hashuserid, formatage, errors
 from time import time, sleep
+from typing import Optional
 from os import environ
-from datetime import datetime, timedelta
-from pytz import timezone
+from urllib.parse import urlencode
 sleep(3)
 
 APPID = environ['APP_ID']
@@ -24,6 +23,16 @@ app.config['DISCORD_BOT_TOKEN'] = TOKEN
 app.config['DISCORD_REDIRECT_URI'] = 'https://confessions.xmo.dev/callback'
 
 discord = DiscordOAuth2Session(app)
+
+def dynamicredirect(request: Request, error: Optional[str] = None) -> redirect:
+    queryparams = request.args.to_dict(flat = True)
+
+    if error:
+        error = errors.get(error, "Unknown error")
+        queryparams["error"] = error
+
+    return redirect(f"/?{urlencode(queryparams)}")
+
 
 @app.route("/login/")
 def login():
@@ -205,7 +214,7 @@ def upvote():
     upvoters = data[0] or []
 
     if userhash in upvoters:
-        return redirect("/")  # Already upvoted
+        return dynamicredirect(request, "alreadyupvoted")  # Already upvoted
 
     # Add user to upvoters
     psqlrun("UPDATE confessions SET upvoters = array_append(upvoters, %s) WHERE id = %s;", data = (userhash, confessionid), commit = True)
@@ -239,7 +248,7 @@ def report():
     # Audit log
     psqlrun("INSERT INTO auditlog (confessionid, userhash, action, method) VALUES (%s, %s, %s, %s);", data = (confessionid, userhash, "REPORT", "USER"),commit = True)
 
-    # additionally, if the confession has 10 reports, hide it from the feed/delete it
+    # additionally, if the confession has five reports, hide it from the feed/delete it
     data = psqlrun(query = "SELECT array_length(reporters, 1) FROM confessions WHERE id = %s;", data = (confessionid,), fetchall = False)
 
 

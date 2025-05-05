@@ -33,10 +33,10 @@
         }
         .confession-box p {
             margin-top: 0;
-            margin-bottom: 10px; /* or whatever matches your bottom spacing */
-            line-height: 1.4; /* optional: makes it a bit more compact */
-            white-space: pre-wrap; /* ensures new lines are respected */
-            word-wrap: break-word; /* ensures long words are wrapped */
+            margin-bottom: 10px; 
+            line-height: 1.4; 
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
         .confession-meta {
             font-size: 12px;
@@ -137,6 +137,12 @@
             font-size: 14px;
             margin-left: 10px;
         }
+        .error-message {
+            color: #ff4d4f; 
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
     </style>
 </head>
 <body>
@@ -156,6 +162,13 @@
 
     <div class="container">
         <h1>Sound's World Confessions</h1>
+
+        {% if request.args.get('err') %}
+            <div class="error-message">
+                {{ request.args.get('err') }}
+            </div>
+        {% endif %}
+
 
         <form method="GET" action="/" style="margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
             <input
