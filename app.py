@@ -219,7 +219,7 @@ def upvote():
     upvoters = data[0] or []
 
     if userhash in upvoters:
-        return dynamicredirect(request, "alreadyupvoted")  # Already upvoted
+        return dynamicredirect("alreadyupvoted")  # Already upvoted
 
     # Add user to upvoters
     psqlrun("UPDATE confessions SET upvoters = array_append(upvoters, %s) WHERE id = %s;", data = (userhash, confessionid), commit = True)
