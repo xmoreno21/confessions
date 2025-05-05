@@ -77,7 +77,7 @@ def index():
         sort = 'trending'
 
     if sort == 'trending':
-        data = psqlrun(query = "SELECT id, content, createdat, COALESCE(array_length(upvoters, 1), 0) AS upvotes, COALESCE(array_length(reporters, 1), 0) AS reports, (COALESCE(array_length(upvoters, 1), 0) + 1) / POWER(EXTRACT(EPOCH FROM (NOW() - createdat)) + 600, 0.9) AS score FROM confessions WHERE deletedby IS NULL ORDER BY score DESC LIMIT 50;", fetchall = True)
+        data = psqlrun(query = "SELECT id, content, createdat, COALESCE(array_length(upvoters, 1), 0) AS upvotes, COALESCE(array_length(reporters, 1), 0) AS reports, (COALESCE(array_length(upvoters, 1), 0) + 1) / POWER(EXTRACT(EPOCH FROM (NOW() - createdat)) + 300, 0.9) AS score FROM confessions WHERE deletedby IS NULL ORDER BY score DESC LIMIT 50;", fetchall = True)
     elif sort == 'newest':
         data = psqlrun(query = "SELECT id, content, createdat, COALESCE(array_length(upvoters, 1), 0) AS upvotes, COALESCE(array_length(reporters, 1), 0) AS reports FROM confessions WHERE deletedby IS NULL ORDER BY createdat DESC LIMIT 50;", fetchall = True)
     elif sort == 'top':
