@@ -181,7 +181,7 @@ def aiscan(text: str) -> bool:
         badcategories = ['harassment/threatening', 'hate', 'hate/threatening', 'self-harm/intent', 'self-harm/instructions', 'sexual', 'sexual/minors', 'violence', 'violence/graphic']
         for category in badcategories:
             if data['results'][0]['categories'][category]:
-                 return True
+                return True
         return False
     else:
         print(r.status_code)
