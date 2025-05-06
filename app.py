@@ -165,6 +165,9 @@ def about():
 
 @app.route("/submit", methods = ["POST"])
 def submit():
+    # temp code - confession submission disabled for now
+    return dynamicredirect("oncooldown")
+
     if not discord.authorized:
         return dynamicredirect("notloggedin")
     
