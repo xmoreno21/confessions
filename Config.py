@@ -9,6 +9,8 @@ from psycopg_pool import ConnectionPool
 from nacl.signing import VerifyKey
 from hashlib import sha256
 from functools import wraps
+from requests import post
+from re import compile, IGNORECASE, search, escape
 sleep(3)
 
 APPID = environ['APP_ID']
@@ -16,6 +18,8 @@ CLIENT_PUBLIC_KEY = environ['CLIENT_PUBLIC_KEY']
 DATABASE_URL = environ['DATABASE_URL']
 TOKEN = environ['TOKEN']
 HASHING_KEY = environ['HASHING_KEY']
+OPENAI_KEY = environ['OPENAI_KEY']
+bannedwords = set(environ.get('BANNED_WORDS', '').lower().split(','))
 starttime = round(time())
 
 errors = {
@@ -31,6 +35,7 @@ errors = {
     'alreadyupvoted': 'You have already upvoted this confession.',
     'alreadyreported': 'You have already reported this confession.',
     'noaccess': 'You do not have access to this function.',
+    'badcontent': 'Your confession triggered the content filter. Please try again with another confession.',
 }
 
 dbpool = ConnectionPool(conninfo = DATABASE_URL, min_size = 3, max_size = 10)
@@ -168,3 +173,38 @@ def formatage(seconds):
         return f"{seconds // 3600}h"
     else:
         return f"{seconds // 86400}d"
+
+def aiscan(text: str) -> bool:
+    r = post(url = 'https://api.openai.com/v1/moderations', headers = {'Authorization': f'Bearer {OPENAI_KEY}'}, json = {'model': 'omni-moderation-latest', 'input': text})
+    if r.status_code == 200:
+        data = r.json()
+        badcategories = ['harassment/threatening', 'hate', 'hate/threatening', 'self-harm/intent', 'self-harm/instructions', 'sexual', 'sexual/minors', 'violence', 'violence/graphic']
+        for category in badcategories:
+            if data['results'][0]['categories'][category]:
+                 return True
+        return False
+    else:
+        print(r.status_code)
+        print(str(r.json()))
+        return False
+    
+def containsurl(text: str) -> bool:
+    urlregex = compile(r"(https?://|www\.)\S+|(?:[a-zA-Z0-9-]+\.)+(?:com|net|org|gov|edu|io|co|xyz|info|biz|me|gg|dev)(/[\w\-.~:/?#\[\]@!$&'()*+,;=%]*)?", IGNORECASE)
+
+    return bool(urlregex.search(text))
+
+def containsbannedwords(text: str) -> bool:
+    lowertext = text.lower()
+
+    return any(search(rf"\b{escape(word)}\b", lowertext) for word in bannedwords)
+
+def containscharspam(text: str) -> bool:
+    return bool(search(r"(.)\1{6,}", text))  # 7+ repeated chars
+
+def proactivechecks(text: str) -> bool:
+    return (
+        containsbannedwords(text)
+        or containsurl(text)
+        or containscharspam(text)
+        or aiscan(text)
+    )

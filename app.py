@@ -1,6 +1,6 @@
-from flask import Flask, request, jsonify, render_template, redirect, Request
+from flask import Flask, request, jsonify, render_template, redirect
 from flask_discord import DiscordOAuth2Session
-from Config import psqlrun, hashuserid, formatage, errors
+from Config import psqlrun, hashuserid, formatage, errors, proactivechecks
 from time import time, sleep
 from typing import Optional
 from os import environ
@@ -165,9 +165,6 @@ def about():
 
 @app.route("/submit", methods = ["POST"])
 def submit():
-    # temp code - confession submission disabled for now
-    return dynamicredirect("oncooldown")
-
     if not discord.authorized:
         return dynamicredirect("notloggedin")
     
@@ -196,6 +193,11 @@ def submit():
     
     if suspensionuntil is not None and now < suspensionuntil:
         return dynamicredirect("suspended") # user is suspended
+    
+    # almost done, check the confession for bad content
+    result = proactivechecks(confession)
+    if result == True:
+        return dynamicredirect("badcontent") # confession triggered the content filter
     
     # good to go, insert the confession and audit log and start the cooldown
     cooldownuntil = now + 300
